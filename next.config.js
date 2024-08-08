@@ -16,7 +16,7 @@ const nextConfig = {
   reactStrictMode: false,
   trailingSlash: true,
   publicRuntimeConfig: {
-    ..._getPublicEnv('NEXT_PUBLIC_'),
+    ..._getPublicEnv("NEXT_PUBLIC_"),
   },
   eslint: {
     // Warning: This allows production builds to successfully complete even if
@@ -31,6 +31,15 @@ const nextConfig = {
     };
 
     return config;
+  },
+  images: {
+    dangerouslyAllowSVG: true,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
   },
 };
 

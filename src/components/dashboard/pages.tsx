@@ -1,6 +1,8 @@
 import { client, selectSp } from "@/client";
 import { getOffchainAuthKeys } from "@/utils/offchainAuth";
+import { toSvg } from "jdenticon";
 import moment from "moment";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 import { useAccount } from "wagmi";
@@ -45,6 +47,8 @@ export function Dashboard() {
             listObjectsTx!.body.GfSpListObjectsByBucketNameResponse.Objects;
 
           objects.forEach((el) => {
+            const svgString = toSvg(el.ObjectInfo.ObjectName, 100);
+            console.log(svgString);
             setPosts((posts) => [
               ...posts,
               {
@@ -53,6 +57,7 @@ export function Dashboard() {
                 owner: el.ObjectInfo.Owner,
                 creator: el.ObjectInfo.Creator,
                 createdAt: el.ObjectInfo.CreateAt,
+                avatar: svgString,
               },
             ]);
           });
@@ -114,11 +119,16 @@ export function Dashboard() {
               className="flex justify-between gap-x-6 py-5 items-center"
             >
               <div className="flex min-w-0 gap-x-4">
-                <image
+                <Image
                   className="h-12 w-12 flex-none rounded-full bg-gray-50"
-                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                  src={`data:image/svg+xml;utf8,${encodeURIComponent(
+                    el.avatar
+                  )}`}
                   alt=""
+                  width={256}
+                  height={256}
                 />
+
                 <div className="min-w-0 flex-auto">
                   <p className="text-base font-semibold leading-6 text-gray-900">
                     {el.objectName}

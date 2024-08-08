@@ -8,10 +8,11 @@ import {
   VisibilityType,
 } from "@bnb-chain/greenfield-js-sdk";
 import { ReedSolomon } from "@bnb-chain/reed-solomon";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { useAccount } from "wagmi";
 
-export const Greenfield = ({ data }) => {
+export const Greenfield = ({ children, data }) => {
   const { address, connector } = useAccount();
   const [info, setInfo] = useState<{
     bucketName: string;
@@ -24,231 +25,247 @@ export const Greenfield = ({ data }) => {
   });
 
   const [txHash, setTxHash] = useState<string>();
+  const router = useRouter();
+
+  const createBucket = async () => {
+    if (!address) return;
+
+    const spInfo = await selectSp();
+    console.log("spInfo", spInfo);
+
+    const provider = await connector?.getProvider();
+    const offChainData = await getOffchainAuthKeys(address, provider);
+    if (!offChainData) {
+      alert("No offchain, please create offchain pairs first");
+      return;
+    }
+
+    try {
+      const createBucketTx = await client.bucket.createBucket({
+        bucketName: info.bucketName,
+        creator: address,
+        primarySpAddress: spInfo.primarySpAddress,
+        visibility: VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
+        chargedReadQuota: Long.fromString("0"),
+        paymentAddress: address,
+      });
+
+      const simulateInfo = await createBucketTx.simulate({
+        denom: "BNB",
+      });
+
+      console.log("simulateInfo", simulateInfo);
+
+      const res = await createBucketTx.broadcast({
+        denom: "BNB",
+        gasLimit: Number(simulateInfo?.gasLimit),
+        gasPrice: simulateInfo?.gasPrice || "5000000000",
+        payer: address,
+        granter: "",
+      });
+
+      if (res.code === 0) {
+        alert("success");
+      }
+    } catch (err) {
+      console.log(typeof err);
+      if (err instanceof Error) {
+        alert(err.message);
+      }
+      if (err && typeof err === "object") {
+        alert(JSON.stringify(err));
+      }
+    }
+  };
+
+  const createPost = async () => {
+    if (!address && !data) return;
+
+    const spInfo = await selectSp();
+    console.log("spInfo", spInfo);
+
+    const provider = await connector?.getProvider();
+    const offChainData = await getOffchainAuthKeys(address, provider);
+    if (!offChainData) {
+      alert("No offchain, please create offchain pairs first");
+      return;
+    }
+
+    function stringToUint(string) {
+      var string = btoa(unescape(encodeURIComponent(string))),
+        charList = string.split(""),
+        uintArray = [];
+      for (var i = 0; i < charList.length; i++) {
+        uintArray.push(charList[i].charCodeAt(0));
+      }
+      return new Uint8Array(uintArray);
+    }
+
+    try {
+      const rs = new ReedSolomon();
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
+      const fileBytes = await blob.arrayBuffer();
+
+      // console.log(JSON.stringify(data));
+      const expectCheckSums = rs.encode(new Uint8Array(fileBytes));
+
+      console.log("rs", expectCheckSums);
+
+      const createPostTx = await client.object.createObject({
+        bucketName: info.bucketName,
+        objectName: info.objectName,
+        creator: address,
+        visibility: VisibilityType.VISIBILITY_TYPE_PRIVATE,
+        contentType: "application/json",
+        redundancyType: RedundancyType.REDUNDANCY_EC_TYPE,
+        payloadSize: Long.fromInt(fileBytes.byteLength),
+        expectChecksums: expectCheckSums.map((x) => bytesFromBase64(x)),
+      });
+
+      const simulateInfo = await createPostTx.simulate({
+        denom: "BNB",
+      });
+
+      console.log("simulateInfo", simulateInfo);
+
+      const res = await createPostTx.broadcast({
+        denom: "BNB",
+        gasLimit: Number(simulateInfo?.gasLimit),
+        gasPrice: simulateInfo?.gasPrice || "5000000000",
+        payer: address,
+        granter: "",
+      });
+
+      if (res.code === 0) {
+        alert("create object success");
+
+        setTxHash(res.transactionHash);
+
+        const uploadRes = await client.object.uploadObject(
+          {
+            bucketName: info.bucketName,
+            objectName: info.objectName,
+            body: blob,
+            txnHash: txHash,
+            duration: 20000,
+            onProgress: (e: OnProgressEvent) => {
+              console.log("progress: ", e.percent);
+            },
+          },
+          {
+            type: "EDDSA",
+            domain: window.location.origin,
+            seed: offChainData.seedString,
+            address,
+          }
+        );
+        console.log("uploadRes", uploadRes);
+
+        if (uploadRes.code === 0) {
+          alert("success");
+          router.push("/dashboard");
+        }
+      }
+    } catch (err) {
+      console.log(typeof err);
+      if (err instanceof Error) {
+        alert(err.message);
+      }
+      if (err && typeof err === "object") {
+        alert(JSON.stringify(err));
+      }
+    }
+  };
 
   return (
-    <>
-      <section className="section">
-        <div className="container">
-          <h1 className="title">Greenfield Storage Demo</h1>
-          <p className="subtitle">
-            Create Bucket / Create Object / Upload File / Download File
-          </p>
-        </div>
-      </section>
+    <div className="py-10">
+      <div className="px-4 py-2 sm:px-0">
+        <h3 className="text-3xl font-semibold leading-7 text-gray-900">Post</h3>
 
-      <div className="box">
-        <div className="field is-horizontal">
-          <div className="field-label is-normal">
-            <label className="label">Bucket</label>
+        <p className="mt-2 max-w-2xl text-base leading-6 text-gray-500">
+          Create a new post
+        </p>
+      </div>
+
+      <div className="mt-3 border-t border-gray-100">
+        <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <div className="text-base font-medium leading-6 text-gray-900">
+            Website (Bucket)
           </div>
-          <div className="field-body">
-            <div className="field">
-              <div className="control">
-                <input
-                  className="input"
-                  type="text"
-                  value={info.bucketName}
-                  placeholder="bucket name"
-                  onChange={(e) => {
-                    setInfo({ ...info, bucketName: e.target.value });
-                  }}
-                />
-              </div>
-            </div>
+          <div className="mt-1 text-base leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+            {info.bucketName}
           </div>
-        </div>
-
-        <div className="field">
-          <button
-            className={"button is-primary"}
-            onClick={async () => {
-              if (!address) return;
-
-              const spInfo = await selectSp();
-              console.log("spInfo", spInfo);
-
-              const provider = await connector?.getProvider();
-              const offChainData = await getOffchainAuthKeys(address, provider);
-              if (!offChainData) {
-                alert("No offchain, please create offchain pairs first");
-                return;
-              }
-
-              try {
-                const createBucketTx = await client.bucket.createBucket({
-                  bucketName: info.bucketName,
-                  creator: address,
-                  primarySpAddress: spInfo.primarySpAddress,
-                  visibility: VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
-                  chargedReadQuota: Long.fromString("0"),
-                  paymentAddress: address,
-                });
-
-                const simulateInfo = await createBucketTx.simulate({
-                  denom: "BNB",
-                });
-
-                console.log("simulateInfo", simulateInfo);
-
-                const res = await createBucketTx.broadcast({
-                  denom: "BNB",
-                  gasLimit: Number(simulateInfo?.gasLimit),
-                  gasPrice: simulateInfo?.gasPrice || "5000000000",
-                  payer: address,
-                  granter: "",
-                });
-
-                if (res.code === 0) {
-                  alert("success");
-                }
-              } catch (err) {
-                console.log(typeof err);
-                if (err instanceof Error) {
-                  alert(err.message);
-                }
-                if (err && typeof err === "object") {
-                  alert(JSON.stringify(err));
-                }
-              }
-            }}
-          >
-            Create Bucket Tx
-          </button>
         </div>
       </div>
 
-      <div className="box">
-        <div className="field is-horizontal">
-          <div className="field-label is-normal">
-            <label className="label">Object</label>
-          </div>
-          <div className="field-body">
-            <div className="field">
-              <div className="control">
-                <input
-                  className="input"
-                  type="text"
-                  value={info.objectName}
-                  placeholder="object name"
-                  onChange={(e) => {
-                    setInfo({ ...info, objectName: e.target.value });
-                  }}
-                />
-              </div>
-            </div>
+      <div className="mt-3 border-t border-gray-100">
+        <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <label
+            htmlFor="postid"
+            className="text-base font-medium leading-6 text-gray-900"
+          >
+            Post ID
+          </label>
+          <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 sm:max-w-md">
+            <input
+              type="text"
+              name="postid"
+              id="postid"
+              value={info.objectName}
+              className="input"
+              placeholder="post name"
+              onChange={(e) => {
+                setInfo({ ...info, objectName: e.target.value });
+              }}
+            />
           </div>
         </div>
+      </div>
 
-        {/* upload */}
-        <div className="field">
-          <button
-            className="button is-primary"
-            onClick={async () => {
-              if (!address && !data) return;
-
-              const spInfo = await selectSp();
-              console.log("spInfo", spInfo);
-
-              const provider = await connector?.getProvider();
-              const offChainData = await getOffchainAuthKeys(address, provider);
-              if (!offChainData) {
-                alert("No offchain, please create offchain pairs first");
-                return;
-              }
-
-              function stringToUint(string) {
-                var string = btoa(unescape(encodeURIComponent(string))),
-                  charList = string.split(""),
-                  uintArray = [];
-                for (var i = 0; i < charList.length; i++) {
-                  uintArray.push(charList[i].charCodeAt(0));
-                }
-                return new Uint8Array(uintArray);
-              }
-
-              try {
-                const rs = new ReedSolomon();
-                const blob = new Blob([JSON.stringify(data, null, 2)], {
-                  type: "application/json",
-                });
-                const fileBytes = await blob.arrayBuffer();
-
-                // console.log(JSON.stringify(data));
-                const expectCheckSums = rs.encode(new Uint8Array(fileBytes));
-
-                console.log("rs", expectCheckSums);
-
-                const createPostTx = await client.object.createObject({
-                  bucketName: info.bucketName,
-                  objectName: info.objectName,
-                  creator: address,
-                  visibility: VisibilityType.VISIBILITY_TYPE_PRIVATE,
-                  contentType: "application/json",
-                  redundancyType: RedundancyType.REDUNDANCY_EC_TYPE,
-                  payloadSize: Long.fromInt(fileBytes.byteLength),
-                  expectChecksums: expectCheckSums.map((x) =>
-                    bytesFromBase64(x)
-                  ),
-                });
-
-                const simulateInfo = await createPostTx.simulate({
-                  denom: "BNB",
-                });
-
-                console.log("simulateInfo", simulateInfo);
-
-                const res = await createPostTx.broadcast({
-                  denom: "BNB",
-                  gasLimit: Number(simulateInfo?.gasLimit),
-                  gasPrice: simulateInfo?.gasPrice || "5000000000",
-                  payer: address,
-                  granter: "",
-                });
-
-                if (res.code === 0) {
-                  alert("create object success");
-
-                  setTxHash(res.transactionHash);
-
-                  const uploadRes = await client.object.uploadObject(
-                    {
-                      bucketName: info.bucketName,
-                      objectName: info.objectName,
-                      body: blob,
-                      txnHash: txHash,
-                      duration: 20000,
-                      onProgress: (e: OnProgressEvent) => {
-                        console.log("progress: ", e.percent);
-                      },
-                    },
-                    {
-                      type: "EDDSA",
-                      domain: window.location.origin,
-                      seed: offChainData.seedString,
-                      address,
-                    }
-                  );
-                  console.log("uploadRes", uploadRes);
-
-                  if (uploadRes.code === 0) {
-                    alert("success");
-                  }
-                }
-              } catch (err) {
-                console.log(typeof err);
-                if (err instanceof Error) {
-                  alert(err.message);
-                }
-                if (err && typeof err === "object") {
-                  alert(JSON.stringify(err));
-                }
-              }
-            }}
+      <div className="mt-3 border-t border-gray-100">
+        <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <label
+            htmlFor="postid"
+            className="text-base font-medium leading-6 text-gray-900"
           >
-            Save Post
+            Visibility
+          </label>
+          <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 sm:max-w-md">
+            <input
+              type="text"
+              name="visibility"
+              id="visibility"
+              value="Public"
+              className="input"
+              placeholder="Visiblity"
+              readOnly
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-6 pb-4 sm:px-0 sm:gap-4">{children}</div>
+
+      <div className="mt-4 border-t border-gray-100">
+        <div className="mt-4 flex items-center justify-end gap-x-6">
+          <button
+            onClick={() => {
+              router.push("/dashboard");
+            }}
+            className="text-base font-semibold leading-6 text-gray-900"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={createPost}
+            className="rounded-md bg-green-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            Create
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 };

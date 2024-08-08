@@ -15,7 +15,7 @@ let Editor = dynamic(() => import("@/components/editor"), {
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function CreateNewPost() {
+export default function Dashboard() {
   const isMounted = useIsMounted();
   const { isConnected } = useAccount();
   const [content, setContent] = useState("");

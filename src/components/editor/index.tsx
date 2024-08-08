@@ -76,15 +76,8 @@ const Editor = ({ data, onChange, holder }) => {
   return (
     <>
       <div
+        className="w-full min-h-[500px] bg-slate-100 py-9 rounded-2xl text-black"
         id={holder}
-        style={{
-          width: "100%",
-          minHeight: 500,
-          borderRadius: " 7px",
-          backgroundColor: "white",
-          paddingTop: "20px",
-          color: "black",
-        }}
       />
     </>
   );

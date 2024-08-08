@@ -6,16 +6,11 @@ import { Inter } from "next/font/google";
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 import { useAccount } from "wagmi";
-
-import dynamic from "next/dynamic";
-import { Greenfield } from "@/components/greenfield";
-let Editor = dynamic(() => import("@/components/editor"), {
-  ssr: false,
-});
+import Dashboard from "@/components/dashboard";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function Dashboard() {
+export default function DashboardPage() {
   const isMounted = useIsMounted();
   const { isConnected } = useAccount();
   const [content, setContent] = useState("");
@@ -34,17 +29,7 @@ export default function Dashboard() {
         <Wallet />
         {isConnected && (
           <>
-            <Greenfield data={content}>
-              <Editor
-                data={content}
-                onChange={(e) => {
-                  console.log(e);
-                  setContent(e);
-                }}
-                holder="editor_create"
-                editorRef={editorRef}
-              />
-            </Greenfield>
+            <Dashboard />
           </>
         )}
       </main>

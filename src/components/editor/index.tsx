@@ -76,7 +76,7 @@ const Editor = ({ data, onChange, holder }) => {
   return (
     <>
       <div
-        className="w-full min-h-[500px] bg-slate-100 py-9 rounded-2xl text-black"
+        className="w-full min-h-[500px] bg-slate-50 py-9 rounded-2xl text-black"
         id={holder}
       />
     </>

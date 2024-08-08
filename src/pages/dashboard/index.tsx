@@ -1,3 +1,4 @@
+import { Dashboard } from "@/components/dashboard";
 import { Demo } from "@/components/demo";
 import { Wallet } from "@/components/wallet";
 import { useIsMounted } from "@/hooks/useIsMounted";
@@ -6,7 +7,6 @@ import { Inter } from "next/font/google";
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 import { useAccount } from "wagmi";
-import Dashboard from "@/components/dashboard";
 
 const inter = Inter({ subsets: ["latin"] });
 

@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 import { useAccount } from "wagmi";
 
-export function Dashboard() {
+export function WebsitesDashboard() {
   const { address, connector } = useAccount();
   const [info, setInfo] = useState<{
     bucketName: string;
@@ -17,13 +17,13 @@ export function Dashboard() {
     objectName: "",
   });
 
-  const [posts, setPosts] = useState([]);
+  const [buckets, setBuckets] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
     if (!address) return;
 
-    const listPosts = async () => {
+    const listBuckets = async () => {
       const spInfo = await selectSp();
       console.log("spInfo", spInfo);
 
@@ -35,28 +35,27 @@ export function Dashboard() {
       }
 
       try {
-        const listObjectsTx = await client.object.listObjects({
-          bucketName: info.bucketName,
+        const listBucketsTx = await client.bucket.listBuckets({
+          address: address,
           endpoint: spInfo.endpoint,
         });
 
-        if (listObjectsTx.code === 0) {
-          console.log(listObjectsTx.body);
+        if (listBucketsTx.code === 0) {
+          const bucketsInfo = listBucketsTx.body;
+          //   console.log(bucketsInfo);
 
-          const objects =
-            listObjectsTx!.body.GfSpListObjectsByBucketNameResponse.Objects;
-
-          objects.forEach((el) => {
-            const svgString = toSvg(el.ObjectInfo.ObjectName, 100);
-            console.log(svgString);
-            setPosts((posts) => [
-              ...posts,
+          bucketsInfo.forEach((el) => {
+            const svgString = toSvg(el.BucketInfo.BucketName, 100);
+            // console.log(svgString);
+            setBuckets((buckets) => [
+              ...buckets,
               {
-                bucketName: el.ObjectInfo.BucketName,
-                objectName: el.ObjectInfo.ObjectName,
-                owner: el.ObjectInfo.Owner,
-                creator: el.ObjectInfo.Creator,
-                createdAt: el.ObjectInfo.CreateAt,
+                id: el.BucketInfo.Id,
+                bucketName: el.BucketInfo.BucketName,
+                owner: el.BucketInfo.Owner,
+                paymentAddress: el.BucketInfo.PaymentAddress,
+                createdAt: el.BucketInfo.CreateAt,
+                updatedAt: el.UpdateTime,
                 avatar: svgString,
               },
             ]);
@@ -73,8 +72,8 @@ export function Dashboard() {
       }
     };
 
-    setPosts([]);
-    listPosts();
+    setBuckets([]);
+    listBuckets();
   }, [address]);
 
   return (
@@ -82,10 +81,10 @@ export function Dashboard() {
       <div className="pt-10 pb-2 sm:px-0 flex flex-row items-center justify-between">
         <div className="flex flex-col">
           <h3 className="text-3xl font-semibold leading-7 text-gray-900">
-            Post Dashboard
+            Dashboard
           </h3>
           <p className="mt-2 max-w-2xl text-base leading-6 text-gray-500">
-            Manage your posts
+            Manage your websites on Greenfield
           </p>
         </div>
         <div className="mb-4 flex items-center justify-end">
@@ -95,43 +94,16 @@ export function Dashboard() {
               router.push("/editor");
             }}
           >
-            Create Post
+            Create Website
           </button>
         </div>
       </div>
 
-      <div className="pt-4">
-        <div className="py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-          <div className="text-base font-medium leading-6 text-gray-900">
-            Website (Bucket)
-          </div>
-          <div className="mt-1 text-base leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-            {info.bucketName}
-          </div>
-        </div>
-      </div>
-
-      <div className="border-t border-gray-100">
-        <div className="py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-          <div className="text-base font-medium leading-6 text-gray-900">
-            URL
-          </div>
-          <div className="mt-1 text-base leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-            <a
-              href={`gnfd://${info.bucketName}`}
-              className="text-blue-600 hover:text-blue-500"
-            >
-              gnfd://{info.bucketName}
-            </a>
-          </div>
-        </div>
-      </div>
-
       <ul role="list" className="divide-y divide-gray-100">
-        {posts.length > 0 &&
-          posts.map((el) => (
+        {buckets.length > 0 &&
+          buckets.map((el) => (
             <li
-              key={el.objectName}
+              key={el.bucketName}
               className="flex justify-between gap-x-6 py-5 items-center"
             >
               <div className="flex min-w-0 gap-x-4">
@@ -147,23 +119,29 @@ export function Dashboard() {
 
                 <div className="min-w-0 flex-auto">
                   <p className="text-base font-semibold leading-6 text-gray-900">
-                    {el.objectName}
+                    {el.bucketName}
+                  </p>
+                  <p className="text-sm font-semibold leading-6 text-gray-500">
+                    URL:{" "}
+                    <a
+                      href={`gnfd://${el.bucketName}`}
+                      className="text-blue-600 hover:text-blue-500"
+                    >
+                      gnfd://{el.bucketName}
+                    </a>
                   </p>
                   <p className="mt-1 truncate text-sm leading-5 text-gray-500">
                     Created at{" "}
-                    {moment.unix(el.createdAt).format("YYYY-MM-DDTHH:MMZ")}
+                    {moment.unix(el.updatedAt).format("YYYY-MM-DDTHH:MMZ")}
                   </p>
                 </div>
               </div>
               <div className="shrink-0 flex flex-row gap-6">
-                <a href="#" className="text-blue-600 hover:text-blue-500">
-                  View
-                </a>
-                <a href="#" className="text-green-600 hover:text-green-500">
-                  Edit
-                </a>
-                <a href="#" className="text-red-600 hover:text-red-500">
-                  Delete
+                <a
+                  href="/dashboard/posts/"
+                  className="text-blue-600 hover:text-blue-500"
+                >
+                  Manage
                 </a>
               </div>
             </li>

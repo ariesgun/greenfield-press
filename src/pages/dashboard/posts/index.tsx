@@ -1,22 +1,18 @@
+import { Breadcrumb } from "@/components/breadcrumb";
+import { Dashboard } from "@/components/dashboard";
 import { Demo } from "@/components/demo";
 import { Wallet } from "@/components/wallet";
 import { useIsMounted } from "@/hooks/useIsMounted";
 import styles from "@/styles/Home.module.css";
 import { Inter } from "next/font/google";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import { useAccount } from "wagmi";
 
-import dynamic from "next/dynamic";
-import { Greenfield } from "@/components/greenfield";
-import { Breadcrumb } from "@/components/breadcrumb";
-let Editor = dynamic(() => import("@/components/editor"), {
-  ssr: false,
-});
-
 const inter = Inter({ subsets: ["latin"] });
 
-export default function CreateNewPost() {
+export default function DashboardPage() {
   const isMounted = useIsMounted();
   const { isConnected } = useAccount();
   const [content, setContent] = useState("");
@@ -33,20 +29,10 @@ export default function CreateNewPost() {
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
         <Wallet />
+        <Breadcrumb />
         {isConnected && (
           <>
-            <Breadcrumb />
-            <Greenfield data={content}>
-              <Editor
-                data={content}
-                onChange={(e) => {
-                  console.log(e);
-                  setContent(e);
-                }}
-                holder="editor_create"
-                editorRef={editorRef}
-              />
-            </Greenfield>
+            <Dashboard />
           </>
         )}
       </main>

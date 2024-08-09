@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const { isConnected } = useAccount();
   const [content, setContent] = useState("");
   const editorRef = useRef(null);
+  const router = useRouter();
 
   if (!isMounted) return null;
 
@@ -32,7 +33,7 @@ export default function DashboardPage() {
         <Breadcrumb />
         {isConnected && (
           <>
-            <Dashboard />
+            <Dashboard bucket={router.query.bucket} />
           </>
         )}
       </main>

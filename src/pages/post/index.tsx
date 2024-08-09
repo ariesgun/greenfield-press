@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAccount } from "wagmi";
 
 import dynamic from "next/dynamic";
-import { Greenfield } from "@/components/greenfield";
+import { PostGreenfield } from "@/components/greenfield";
 import { Breadcrumb } from "@/components/breadcrumb";
 let Editor = dynamic(() => import("@/components/editor"), {
   ssr: false,
@@ -36,7 +36,7 @@ export default function CreateNewPost() {
         {isConnected && (
           <>
             <Breadcrumb />
-            <Greenfield data={content}>
+            <PostGreenfield data={content}>
               <Editor
                 data={content}
                 onChange={(e) => {
@@ -46,7 +46,7 @@ export default function CreateNewPost() {
                 holder="editor_create"
                 editorRef={editorRef}
               />
-            </Greenfield>
+            </PostGreenfield>
           </>
         )}
       </main>

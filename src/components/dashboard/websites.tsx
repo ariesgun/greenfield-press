@@ -91,7 +91,7 @@ export function WebsitesDashboard() {
           <button
             className="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             onClick={() => {
-              router.push("/editor");
+              router.push("/post");
             }}
           >
             Create Website
@@ -138,7 +138,7 @@ export function WebsitesDashboard() {
               </div>
               <div className="shrink-0 flex flex-row gap-6">
                 <a
-                  href="/dashboard/posts/"
+                  href={`/dashboard/posts/${el.bucketName}`}
                   className="text-blue-600 hover:text-blue-500"
                 >
                   Manage

@@ -7,14 +7,12 @@ import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 import { useAccount } from "wagmi";
 
-export function Dashboard() {
+export function Dashboard({ bucket }: { bucket: string }) {
   const { address, connector } = useAccount();
   const [info, setInfo] = useState<{
     bucketName: string;
-    objectName: string;
   }>({
-    bucketName: "helllo-world-test-xeo",
-    objectName: "",
+    bucketName: bucket,
   });
 
   const [posts, setPosts] = useState([]);
@@ -36,7 +34,7 @@ export function Dashboard() {
 
       try {
         const listObjectsTx = await client.object.listObjects({
-          bucketName: info.bucketName,
+          bucketName: bucket,
           endpoint: spInfo.endpoint,
         });
 
@@ -73,9 +71,10 @@ export function Dashboard() {
       }
     };
 
+    setInfo({ bucketName: bucket });
     setPosts([]);
     listPosts();
-  }, [address]);
+  }, [address, bucket]);
 
   return (
     <div>
@@ -92,7 +91,7 @@ export function Dashboard() {
           <button
             className="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             onClick={() => {
-              router.push("/editor");
+              router.push("/post");
             }}
           >
             Create Post

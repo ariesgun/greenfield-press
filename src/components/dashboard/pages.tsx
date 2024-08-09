@@ -43,13 +43,15 @@ export function Dashboard({ bucket }: { bucket: string }) {
 
           const objects =
             listObjectsTx!.body.GfSpListObjectsByBucketNameResponse.Objects;
+          console.log(objects);
 
           objects.forEach((el) => {
             const svgString = toSvg(el.ObjectInfo.ObjectName, 100);
-            console.log(svgString);
+            // console.log(svgString);
             setPosts((posts) => [
               ...posts,
               {
+                id: el.ObjectInfo.Id,
                 bucketName: el.ObjectInfo.BucketName,
                 objectName: el.ObjectInfo.ObjectName,
                 owner: el.ObjectInfo.Owner,
@@ -155,10 +157,16 @@ export function Dashboard({ bucket }: { bucket: string }) {
                 </div>
               </div>
               <div className="shrink-0 flex flex-row gap-6">
-                <a href="#" className="text-blue-600 hover:text-blue-500">
+                <a
+                  href={`/post/view/${el.id}`}
+                  className="text-blue-600 hover:text-blue-500"
+                >
                   View
                 </a>
-                <a href="#" className="text-green-600 hover:text-green-500">
+                <a
+                  href={`/post/edit/${el.id}`}
+                  className="text-green-600 hover:text-green-500"
+                >
                   Edit
                 </a>
                 <a href="#" className="text-red-600 hover:text-red-500">

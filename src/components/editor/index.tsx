@@ -14,6 +14,7 @@ import SimpleImage from "@editorjs/simple-image";
 import Paragraph from "@editorjs/paragraph";
 import Header from "@editorjs/header";
 import Raw from "@editorjs/raw";
+import { read } from "fs";
 
 const EDITOR_TOOLS = {
   code: Code,
@@ -43,7 +44,7 @@ const EDITOR_TOOLS = {
   },
 };
 
-const Editor = ({ data, onChange, holder }) => {
+const Editor = ({ data, onChange, holder, readOnly = false }) => {
   //add a reference to editor
   const ref = useRef();
   //initialize editorjs
@@ -56,6 +57,7 @@ const Editor = ({ data, onChange, holder }) => {
         placeholder: "Start writting here..",
         tools: EDITOR_TOOLS,
         data,
+        readOnly: readOnly,
         async onChange(api, event) {
           const content = await api.saver.save();
           // console.log(content, "sdfb");

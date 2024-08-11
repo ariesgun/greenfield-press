@@ -15,7 +15,7 @@ import { useAccount } from "wagmi";
 export const PostGreenfield = ({
   children,
   data,
-  objectInfo,
+  objectInfo = null,
   readOnly = false,
 }) => {
   const { address, connector } = useAccount();
@@ -24,7 +24,7 @@ export const PostGreenfield = ({
     objectName: string;
     file: File | null;
   }>({
-    bucketName: "",
+    bucketName: "helllo-world-test-xeo",
     objectName: "",
     file: null,
   });
@@ -72,7 +72,7 @@ export const PostGreenfield = ({
         objectName: info.objectName,
         creator: address,
         visibility: VisibilityType.VISIBILITY_TYPE_PRIVATE,
-        contentType: "text/plain",
+        contentType: "application/json",
         redundancyType: RedundancyType.REDUNDANCY_EC_TYPE,
         payloadSize: Long.fromInt(fileBytes.byteLength),
         expectChecksums: expectCheckSums.map((x) => bytesFromBase64(x)),
@@ -101,7 +101,7 @@ export const PostGreenfield = ({
           {
             bucketName: info.bucketName,
             objectName: info.objectName,
-            body: blob,
+            body: blob as File,
             txnHash: txHash,
             duration: 20000,
             onProgress: (e: OnProgressEvent) => {
@@ -201,6 +201,7 @@ export const PostGreenfield = ({
         </div>
       </div>
 
+      {/* Editorjs */}
       <div className="pt-6 pb-4 sm:px-0 sm:gap-4">{children}</div>
 
       {readOnly ? (

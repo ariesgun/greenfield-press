@@ -14,6 +14,7 @@ import { client, selectSp } from "@/client";
 import { getOffchainAuthKeys } from "@/utils/offchainAuth";
 
 import dynamic from "next/dynamic";
+
 let Editor = dynamic(() => import("@/components/editor"), {
   ssr: false,
 });
@@ -24,7 +25,7 @@ export default function Post() {
   const isMounted = useIsMounted();
   const { address, connector, isConnected } = useAccount();
   const [content, setContent] = useState("");
-  const editorRef = useRef(null);
+  // const editorRef = useRef(null);
   const [info, setInfo] = useState<{
     bucketName: string;
     objectName: string;
@@ -57,7 +58,7 @@ export default function Post() {
 
       try {
         const listObjectTx = await client.object.listObjectsByIds({
-          ids: [objectId],
+          ids: [objectId] as string[],
         });
 
         if (listObjectTx.code === 0) {
@@ -136,7 +137,7 @@ export default function Post() {
                 onChange={(e) => {}}
                 holder="editor_create"
                 readOnly={true}
-                editorRef={editorRef}
+                // editorRef={editorRef}
               />
             </PostGreenfield>
           </>

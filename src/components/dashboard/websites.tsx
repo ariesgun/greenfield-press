@@ -17,7 +17,7 @@ export function WebsitesDashboard() {
     objectName: "",
   });
 
-  const [buckets, setBuckets] = useState([]);
+  const [buckets, setBuckets] = useState<any[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export function WebsitesDashboard() {
         });
 
         if (listBucketsTx.code === 0) {
-          const bucketsInfo = listBucketsTx.body;
+          const bucketsInfo = listBucketsTx?.body!;
           //   console.log(bucketsInfo);
 
           bucketsInfo.forEach((el) => {

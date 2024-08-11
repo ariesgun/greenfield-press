@@ -7,15 +7,15 @@ import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 import { useAccount } from "wagmi";
 
-export function Dashboard({ bucket }: { bucket: string }) {
+export function Dashboard({ bucket }: { bucket: string | string[] }) {
   const { address, connector } = useAccount();
   const [info, setInfo] = useState<{
-    bucketName: string;
+    bucketName: string | string[];
   }>({
     bucketName: bucket,
   });
 
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<any[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export function Dashboard({ bucket }: { bucket: string }) {
 
       try {
         const listObjectsTx = await client.object.listObjects({
-          bucketName: bucket,
+          bucketName: bucket as string,
           endpoint: spInfo.endpoint,
         });
 
@@ -42,7 +42,7 @@ export function Dashboard({ bucket }: { bucket: string }) {
           console.log(listObjectsTx.body);
 
           const objects =
-            listObjectsTx!.body.GfSpListObjectsByBucketNameResponse.Objects;
+            listObjectsTx?.body?.GfSpListObjectsByBucketNameResponse.Objects!;
           console.log(objects);
 
           objects.forEach((el) => {

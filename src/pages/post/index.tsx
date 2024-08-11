@@ -10,6 +10,7 @@ import { useAccount } from "wagmi";
 import dynamic from "next/dynamic";
 import { PostGreenfield } from "@/components/greenfield";
 import { Breadcrumb } from "@/components/breadcrumb";
+
 let Editor = dynamic(() => import("@/components/editor"), {
   ssr: false,
 });
@@ -20,7 +21,7 @@ export default function CreateNewPost() {
   const isMounted = useIsMounted();
   const { isConnected } = useAccount();
   const [content, setContent] = useState("");
-  const editorRef = useRef(null);
+  // const editorRef = useRef(null);
 
   if (!isMounted) return null;
 
@@ -44,7 +45,7 @@ export default function CreateNewPost() {
                   setContent(e);
                 }}
                 holder="editor_create"
-                editorRef={editorRef}
+                // editorRef={editorRef}
               />
             </PostGreenfield>
           </>

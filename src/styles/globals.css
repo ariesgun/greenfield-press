@@ -117,3 +117,42 @@ a {
 .cdx-block {
   max-width: 100% !important;
 }
+
+#editor_create h4 {
+  font-size: 1.125rem;
+  line-height: 1.5;
+  font-weight: 600;
+  color: rgb(17 24 39);
+}
+
+#editor_create h3 {
+  font-size: 1.7rem;
+  line-height: 1.7;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+  color: rgb(17 24 39);
+}
+
+#editor_create h2 {
+  font-size: 2rem;
+  line-height: 1.7;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+  color: rgb(17 24 39);
+}
+
+#editor_create h1 {
+  font-size: 2.5rem;
+  line-height: 1.3;
+  font-weight: 800;
+  margin-bottom: 0.8rem;
+  color: rgb(17 24 39);
+}
+
+#editor_create p {
+  font-size: 1.125rem;
+  line-height: 1.75;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  color: rgb(17 24 39);
+}

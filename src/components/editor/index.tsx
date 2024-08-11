@@ -9,14 +9,14 @@ import InlineCode from "@editorjs/inline-code";
 import List from "@editorjs/list";
 import Quote from "@editorjs/quote";
 import RawTool from "@editorjs/raw";
-import Table from "@editorjs/table";
+// import Table from "@editorjs/table";
 import SimpleImage from "@editorjs/simple-image";
-import Paragraph from "@editorjs/paragraph";
+// import Paragraph from "@editorjs/paragraph";
 import Header from "@editorjs/header";
 import Raw from "@editorjs/raw";
 import { read } from "fs";
 
-const EDITOR_TOOLS = {
+const EDITOR_TOOLS: any = {
   code: Code,
   embed: Embed,
   header: Header,
@@ -44,9 +44,9 @@ const EDITOR_TOOLS = {
   },
 };
 
-const Editor = ({ data, onChange, holder, readOnly = false }) => {
+export default function Editor({ data, onChange, holder, readOnly = false }) {
   //add a reference to editor
-  const ref = useRef();
+  const ref = useRef<any>();
   //initialize editorjs
 
   useEffect(() => {
@@ -83,8 +83,8 @@ const Editor = ({ data, onChange, holder, readOnly = false }) => {
       />
     </>
   );
-};
-
-export default function WrappedEditor({ editorRef, ...props }) {
-  return <Editor {...props} ref={editorRef} />;
 }
+
+// export default function WrappedEditor({ editorRef, ...props }) {
+//   return <Editor {...props} ref={editorRef} />;
+// }

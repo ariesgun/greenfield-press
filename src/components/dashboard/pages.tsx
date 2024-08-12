@@ -4,6 +4,7 @@ import { toSvg } from "jdenticon";
 import moment from "moment";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { Octokit } from "octokit";
 import React, { useEffect, useRef, useState } from "react";
 import { useAccount } from "wagmi";
 
@@ -89,7 +90,42 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
             Manage your posts
           </p>
         </div>
-        <div className="mb-4 flex items-center justify-end">
+        <div className="mb-4 flex items-center justify-end gap-x-4">
+          <button
+            className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            onClick={async () => {
+              // Trigger static webpage build
+
+              // Octokit.js
+              // https://github.com/octokit/core.js#readme
+              try {
+                const octokit = new Octokit({
+                  auth: "YOUR-TOKEN",
+                });
+
+                await octokit.request(
+                  "POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches",
+                  {
+                    owner: "OWNER",
+                    repo: "REPO",
+                    workflow_id: "WORKFLOW_ID",
+                    ref: "topic-branch",
+                    inputs: {
+                      name: "Mona the Octocat",
+                      home: "San Francisco, CA",
+                    },
+                    headers: {
+                      "X-GitHub-Api-Version": "2022-11-28",
+                    },
+                  }
+                );
+              } catch (err) {
+                alert(err);
+              }
+            }}
+          >
+            Publish/ Update Website
+          </button>
           <button
             className="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             onClick={() => {

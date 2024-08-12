@@ -22,10 +22,12 @@ export const PostGreenfield = ({
   const [info, setInfo] = useState<{
     bucketName: string;
     objectName: string;
+    postTitle: string;
     file: File | null;
   }>({
     bucketName: "helllo-world-test-xeo",
     objectName: "",
+    postTitle: "",
     file: null,
   });
 
@@ -169,11 +171,32 @@ export const PostGreenfield = ({
               id="postid"
               value={info.objectName}
               className="input"
-              placeholder="post name"
+              placeholder="Post-id"
               onChange={(e) => {
                 setInfo({ ...info, objectName: e.target.value });
               }}
               readOnly={readOnly}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 border-t border-gray-100">
+        <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <label
+            htmlFor="postTitle"
+            className="text-base font-medium leading-6 text-gray-900"
+          >
+            Title
+          </label>
+          <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 sm:max-w-md">
+            <input
+              type="text"
+              name="postTitle"
+              id="postTitle"
+              value={info.postTitle}
+              className="input"
+              placeholder="Post Title"
             />
           </div>
         </div>

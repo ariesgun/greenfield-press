@@ -31,6 +31,8 @@ export const PostGreenfield = ({
     file: null,
   });
 
+  const [postOrigName, setPostOrigName] = useState("");
+
   const [txHash, setTxHash] = useState<string>();
   const router = useRouter();
 
@@ -42,6 +44,20 @@ export const PostGreenfield = ({
       bucketName: objectInfo.bucketName,
       objectName: objectInfo.objectName,
     });
+  }, [objectInfo]);
+
+  useEffect(() => {
+    if (
+      !objectInfo &&
+      (objectInfo.bucketName === "" || objectInfo.objectName === "")
+    )
+      return;
+
+    client.object
+      .headObject(objectInfo.bucketName, objectInfo.objectName)
+      .then((res: any) => {
+        setPostOrigName(res.objectInfo.objectName);
+      });
   }, [objectInfo]);
 
   const createPost = async () => {
@@ -58,13 +74,38 @@ export const PostGreenfield = ({
     }
 
     try {
+      // Check if object exists
+      if (postOrigName) {
+        console.log("Hhhh", postOrigName);
+        const deleteObjectTx = await client.object.deleteObject({
+          bucketName: info.bucketName,
+          objectName: postOrigName,
+          operator: address,
+        });
+
+        const simulateInfo = await deleteObjectTx.simulate({
+          denom: "BNB",
+        });
+
+        const res = await deleteObjectTx.broadcast({
+          denom: "BNB",
+          gasLimit: Number(simulateInfo?.gasLimit),
+          gasPrice: simulateInfo?.gasPrice || "5000000000",
+          payer: address,
+          granter: "",
+        });
+      }
+
       const rs = new ReedSolomon();
-      const blob = new Blob([JSON.stringify(data, null, 2)], {
+      const payload = {
+        title: info.postTitle,
+        payload: data,
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {
         type: "application/json",
       });
       const fileBytes = await blob.arrayBuffer();
 
-      // console.log(JSON.stringify(data));
       const expectCheckSums = rs.encode(new Uint8Array(fileBytes));
 
       console.log("rs", expectCheckSums);
@@ -73,7 +114,7 @@ export const PostGreenfield = ({
         bucketName: info.bucketName,
         objectName: info.objectName,
         creator: address,
-        visibility: VisibilityType.VISIBILITY_TYPE_PRIVATE,
+        visibility: VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
         contentType: "application/json",
         redundancyType: RedundancyType.REDUNDANCY_EC_TYPE,
         payloadSize: Long.fromInt(fileBytes.byteLength),
@@ -83,8 +124,6 @@ export const PostGreenfield = ({
       const simulateInfo = await createPostTx.simulate({
         denom: "BNB",
       });
-
-      console.log("simulateInfo", simulateInfo);
 
       const res = await createPostTx.broadcast({
         denom: "BNB",
@@ -121,7 +160,7 @@ export const PostGreenfield = ({
 
         if (uploadRes.code === 0) {
           alert("success");
-          router.push("/dashboard");
+          router.push("/dashboard/posts/" + info.bucketName);
         }
       }
     } catch (err) {
@@ -197,6 +236,9 @@ export const PostGreenfield = ({
               value={info.postTitle}
               className="input"
               placeholder="Post Title"
+              onChange={(e) => {
+                setInfo({ ...info, postTitle: e.target.value });
+              }}
             />
           </div>
         </div>

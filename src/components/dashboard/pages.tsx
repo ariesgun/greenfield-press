@@ -106,13 +106,12 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
                 await octokit.request(
                   "POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches",
                   {
-                    owner: "OWNER",
-                    repo: "REPO",
-                    workflow_id: "WORKFLOW_ID",
-                    ref: "topic-branch",
+                    owner: "ariesgun",
+                    repo: "greenfield-blogs-template",
+                    workflow_id: "node.js.yml",
+                    ref: "main",
                     inputs: {
-                      name: "Mona the Octocat",
-                      home: "San Francisco, CA",
+                      bucketName: "info.bucketName",
                     },
                     headers: {
                       "X-GitHub-Api-Version": "2022-11-28",

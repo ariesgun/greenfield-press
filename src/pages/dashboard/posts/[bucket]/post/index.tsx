@@ -20,7 +20,7 @@ const inter = Inter({ subsets: ["latin"] });
 export default function CreateNewPost() {
   const isMounted = useIsMounted();
   const { isConnected } = useAccount();
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState<any>({});
   // const editorRef = useRef(null);
 
   if (!isMounted) return null;
@@ -41,7 +41,7 @@ export default function CreateNewPost() {
               <Editor
                 data={content}
                 onChange={(e) => {
-                  setContent(e);
+                  setContent({ ...content, payload: e });
                 }}
                 holder="editor_create"
                 // editorRef={editorRef}

@@ -129,7 +129,7 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
           <button
             className="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             onClick={() => {
-              router.push("/post");
+              router.push(`/dashboard/posts/${info.bucketName}/post/`);
             }}
           >
             Create Post
@@ -194,13 +194,13 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
               </div>
               <div className="shrink-0 flex flex-row gap-6">
                 <a
-                  href={`/post/view/${el.id}`}
+                  href={`/dashboard/posts/${el.bucketName}/post/view/${el.id}`}
                   className="text-blue-600 hover:text-blue-500"
                 >
                   View
                 </a>
                 <a
-                  href={`/post/edit/${el.id}`}
+                  href={`/dashboard/posts/${el.bucketName}/post/edit/${el.id}`}
                   className="text-green-600 hover:text-green-500"
                 >
                   Edit

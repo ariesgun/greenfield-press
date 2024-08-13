@@ -24,7 +24,7 @@ const inter = Inter({ subsets: ["latin"] });
 export default function Post() {
   const isMounted = useIsMounted();
   const { address, connector, isConnected } = useAccount();
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState<any>({});
   // const editorRef = useRef(null);
   const [info, setInfo] = useState<{
     bucketName: string;
@@ -128,12 +128,12 @@ export default function Post() {
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
         <Wallet />
-        {isConnected && content !== "" && (
+        {isConnected && content && content.payload && (
           <>
             <Breadcrumb />
             <PostGreenfield data={content} objectInfo={info} readOnly={true}>
               <Editor
-                data={content}
+                data={content.payload}
                 onChange={(e) => {}}
                 holder="editor_create"
                 readOnly={true}

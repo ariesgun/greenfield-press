@@ -43,13 +43,15 @@ export const PostGreenfield = ({
       ...info,
       bucketName: objectInfo.bucketName,
       objectName: objectInfo.objectName,
+      postTitle: data.title,
     });
   }, [objectInfo]);
 
   useEffect(() => {
     if (
-      !objectInfo &&
-      (objectInfo.bucketName === "" || objectInfo.objectName === "")
+      !objectInfo ||
+      objectInfo.bucketName === "" ||
+      objectInfo.objectName === ""
     )
       return;
 
@@ -99,7 +101,7 @@ export const PostGreenfield = ({
       const rs = new ReedSolomon();
       const payload = {
         title: info.postTitle,
-        payload: data,
+        payload: data.payload,
       };
       const blob = new Blob([JSON.stringify(payload, null, 2)], {
         type: "application/json",

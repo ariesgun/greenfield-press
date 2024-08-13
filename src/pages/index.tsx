@@ -1,16 +1,17 @@
-import { Demo } from '@/components/demo'
-import { Wallet } from '@/components/wallet'
-import { useIsMounted } from '@/hooks/useIsMounted'
-import styles from '@/styles/Home.module.css'
-import { Inter } from 'next/font/google'
-import Head from 'next/head'
-import { useAccount } from 'wagmi'
+import { Demo } from "@/components/demo";
+import { Wallet } from "@/components/wallet";
+import { useIsMounted } from "@/hooks/useIsMounted";
+import styles from "@/styles/Home.module.css";
+import { Inter } from "next/font/google";
+import Head from "next/head";
+import { useAccount } from "wagmi";
+import DashboardPage from "./dashboard";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const isMounted = useIsMounted();
-  const {isConnected} = useAccount()
+  const { isConnected } = useAccount();
 
   if (!isMounted) return null;
 
@@ -23,10 +24,17 @@ export default function Home() {
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
         <Wallet />
-        {isConnected && <>
-          <Demo />
-        </> }
+        {isConnected && (
+          <div className="shrink-0 flex flex-col gap-6 items-center mt-10">
+            <a
+              href="/dashboard"
+              className="rounded-md bg-green-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Dashboard
+            </a>
+          </div>
+        )}
       </main>
     </>
-  )
+  );
 }

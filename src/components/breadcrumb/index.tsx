@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 
 export function Breadcrumb() {
   const router = useRouter();
-  const splittedPaths = router.pathname.split("/").slice(1);
+  const splittedPaths = router.pathname.split("/").slice(1, 3);
   const paths = splittedPaths.filter((el) => el.charAt(0) !== "[");
   //   console.log(paths);
 
@@ -11,7 +11,7 @@ export function Breadcrumb() {
       <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
         <li className="inline-flex items-center">
           <a
-            href="/dashboard"
+            href="/"
             className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
           >
             <svg
@@ -47,7 +47,7 @@ export function Breadcrumb() {
                 </svg>
                 {idx == paths.length - 1 ? (
                   <a
-                    href="#"
+                    href={`${router.asPath}`}
                     className="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
                   >
                     {path.charAt(0).toUpperCase() + path.slice(1)}

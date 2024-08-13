@@ -205,7 +205,32 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
                 >
                   Edit
                 </a>
-                <a href="#" className="text-red-600 hover:text-red-500">
+                <a
+                  href="#"
+                  className="text-red-600 hover:text-red-500"
+                  onClick={async (e) => {
+                    try {
+                      const tx = await client.object.deleteObject({
+                        bucketName: el.bucketName,
+                        objectName: el.objectName,
+                        operator: address,
+                      });
+                      const simulateTx = await tx.simulate({
+                        denom: "BNB",
+                      });
+
+                      const res = await tx.broadcast({
+                        denom: "BNB",
+                        gasLimit: Number(simulateTx?.gasLimit),
+                        gasPrice: simulateTx?.gasPrice || "5000000000",
+                        payer: address,
+                        granter: "",
+                      });
+                    } catch (err) {
+                      alert("Cannot delete object");
+                    }
+                  }}
+                >
                   Delete
                 </a>
               </div>

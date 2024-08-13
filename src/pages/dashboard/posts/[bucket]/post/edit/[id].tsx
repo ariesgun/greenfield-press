@@ -131,7 +131,9 @@ export default function Post() {
             <PostGreenfield data={content} objectInfo={info} readOnly={false}>
               <Editor
                 data={content.payload}
-                onChange={(e) => {}}
+                onChange={(e) => {
+                  setContent({ ...content, payload: e });
+                }}
                 holder="editor_create"
                 readOnly={false}
                 // editorRef={editorRef}

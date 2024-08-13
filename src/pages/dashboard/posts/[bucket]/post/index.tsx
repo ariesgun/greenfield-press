@@ -41,6 +41,7 @@ export default function CreateNewPost() {
               <Editor
                 data={content}
                 onChange={(e) => {
+                  console.log("H", e);
                   setContent({ ...content, payload: e });
                 }}
                 holder="editor_create"

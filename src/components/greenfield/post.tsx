@@ -66,7 +66,7 @@ export const PostGreenfield = ({
     if (!address && !data) return;
 
     const spInfo = await selectSp();
-    console.log("spInfo", spInfo);
+    // console.log("spInfo", spInfo);
 
     const provider = await connector?.getProvider();
     const offChainData = await getOffchainAuthKeys(address, provider);

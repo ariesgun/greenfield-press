@@ -40,7 +40,7 @@
     "reed-solomon": "^4.0.0",
     "typescript": "5.2.2",
     "viem": "^1.19.11",
-    "wagmi": "^1.4.8"
+    "wagmi": "^1.4.13"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",

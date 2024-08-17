@@ -6,10 +6,21 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { Octokit } from "octokit";
 import React, { FormEvent, useEffect, useRef, useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi";
+import { bnbRegistryABI } from "../contracts/bnbRegistry";
+
+const registryAddress = "0x08ced32a7f3eec915ba84415e9c07a7286977956";
 
 export function Dashboard({ bucket }: { bucket: string | string[] }) {
   const { address, connector } = useAccount();
+
+  const { config } = usePrepareContractWrite({
+    address: registryAddress,
+    abi: bnbRegistryABI,
+    functionName: "setResolver",
+  });
+  const { data, isLoading, isSuccess, write } = useContractWrite(config);
+
   const [info, setInfo] = useState<{
     bucketName: string | string[];
   }>({
@@ -95,6 +106,10 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
     alert("Website is being built...");
   };
 
+  const linkBnb = async (event) => {
+    write();
+  };
+
   return (
     <div>
       <div className="pt-10 pb-2 sm:px-0 flex flex-row items-center justify-between">
@@ -154,12 +169,24 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
             URL
           </div>
           <div className="mt-1 text-base leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-            <a
-              href={`https://gnfd-testnet-sp2.nodereal.io/view/gnfd-press-${info.bucketName}/index.html`}
-              className="text-blue-600 hover:text-blue-500"
-            >
-              {`https://gnfd-testnet-sp2.nodereal.io/view/gnfd-press-${info.bucketName}/index.html`}
-            </a>
+            <div className="flex flex-col gap-y-4">
+              <div>
+                <a
+                  href={`https://gnfd-testnet-sp2.nodereal.io/view/gnfd-press-${info.bucketName}/index.html`}
+                  className="text-blue-600 hover:text-blue-500"
+                >
+                  {`https://gnfd-testnet-sp2.nodereal.io/view/gnfd-press-${info.bucketName}/index.html`}
+                </a>
+              </div>
+              <div>
+                <button
+                  className="rounded-md bg-amber-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-yellow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  onClick={linkBnb}
+                >
+                  Link BNB ID
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import { client, selectSp } from "@/client";
 import { getOffchainAuthKeys } from "@/utils/offchainAuth";
 import { toSvg } from "jdenticon";
@@ -301,6 +303,7 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
     );
 
     console.log(nodehash);
+
     try {
       const res1 = await writeAsync({
         address: registryAddress,

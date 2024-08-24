@@ -46,10 +46,19 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
 
   const web3 = new Web3(bnbMainnetURL);
 
+  enum WebsiteType {
+    Blog = "Blog",
+    Custom = "Custom"
+  }
+
   const [info, setInfo] = useState<{
     bucketName: string | string[];
+    websiteType: WebsiteType;
+    prefix: string
   }>({
     bucketName: bucket,
+    websiteType: WebsiteType.Custom,
+    prefix: ""
   });
 
   const [posts, setPosts] = useState<any[]>([]);
@@ -66,6 +75,8 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
     if (!address) return;
 
     const findInfo = async (bucketName) => {
+      if (!bucketName) return;
+
       try {
         const provider = await connector?.getProvider();
         const offChainData = await getOffchainAuthKeys(address, provider);
@@ -88,9 +99,11 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
             seed: offChainData.seedString,
           }
         );
+        console.log(postOrigName)
         const payload = JSON.parse(await postOrigName.body.text());
         setBnbName(payload.bnb);
-        console.log("COntent: ", payload);
+        setInfo({ ...info, bucketName: bucketName, websiteType: payload.type, prefix: payload.type === WebsiteType.Custom ? "" : "gnfd-press" })
+        console.log("COntent: ", payload, info);
       } catch (error) {
         console.log("File does not exists", error);
       }
@@ -150,7 +163,7 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
       }
     };
 
-    setInfo({ bucketName: bucket });
+    setInfo({ ...info, bucketName: bucket });
     findInfo(bucket);
     setPosts([]);
     listPosts();
@@ -219,6 +232,7 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
       const rs = new ReedSolomon();
       const payload = {
         bnb: bnbName,
+        type: info.websiteType
       };
       const blob = new Blob([JSON.stringify(payload, null, 2)], {
         type: "application/json",
@@ -226,8 +240,6 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
       const fileBytes = await blob.arrayBuffer();
 
       const expectCheckSums = rs.encode(new Uint8Array(fileBytes));
-
-      console.log("rs", expectCheckSums);
 
       const createPostTx = await client.object.createObject({
         bucketName: info.bucketName as string,
@@ -367,33 +379,40 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
           </p>
         </div>
         <div className="mb-4 flex items-center justify-end gap-x-4">
-          <form onSubmit={onSubmit}>
-            <input
-              type="text"
-              name="name"
-              readOnly
-              hidden
-              value={info.bucketName}
-              onChange={(e) => {
-                setInfo({ ...info, bucketName: e.target.value });
-              }}
-            />
-            <button
-              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              type="submit"
-            >
-              Publish/ Update Website
-            </button>
-          </form>
 
-          <button
-            className="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            onClick={() => {
-              router.push(`/dashboard/posts/${info.bucketName}/post/`);
-            }}
-          >
-            Create Post
-          </button>
+
+          {
+            info.websiteType === WebsiteType.Blog ?
+              <>
+                <form onSubmit={onSubmit}>
+                  <input
+                    type="text"
+                    name="name"
+                    readOnly
+                    hidden
+                    value={info.bucketName}
+                    onChange={(e) => {
+                      setInfo({ ...info, bucketName: e.target.value });
+                    }}
+                  />
+                  <button
+                    className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    type="submit"
+                  >
+                    Publish/ Update Website
+                  </button>
+                </form>
+                <button
+                  className="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  onClick={() => {
+                    router.push(`/dashboard/posts/${info.bucketName}/post/`);
+                  }}
+                >
+                  Create Post
+                </button>
+              </>
+              : <></>
+          }
         </div>
       </div>
 
@@ -410,19 +429,44 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
 
       <div className="border-t border-gray-100">
         <div className="py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-          <div className="text-base font-medium leading-6 text-gray-900">
-            URL
+          <div className="text-base font-medium leading-6 text-gray-900 content-center">
+            Type
+          </div>
+          <div className="mt-1 text-base leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+            <div id="websiteType" className="w-full sm:max-w-md bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5">
+              {info.websiteType}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-gray-100">
+        <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <div className="text-base font-medium leading-6 text-gray-900 content-center">
+            GNFD URL
           </div>
           <div className="mt-1 text-base leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
             <div className="flex flex-col gap-y-4">
               <div>
                 <a
-                  href={`https://gnfd-testnet-sp2.nodereal.io/view/gnfd-press-${info.bucketName}/index.html`}
+                  href={`https://gnfd-testnet-sp2.nodereal.io/view/${info.prefix}${info.bucketName}/index.html`}
                   className="text-blue-600 hover:text-blue-500"
                 >
-                  {`https://gnfd-testnet-sp2.nodereal.io/view/gnfd-press-${info.bucketName}/index.html`}
+                  {`https://gnfd-testnet-sp2.nodereal.io/view/${info.prefix}${info.bucketName}/index.html`}
                 </a>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="border-t border-gray-100">
+        <div className="py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <div className="text-base font-medium leading-6 text-gray-900 content-center">
+            .bnb Name Service URL
+          </div>
+
+          <div className="mt-1 text-base leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+            <div className="flex flex-col gap-y-4 content-center">
               {bnbName !== "" && (
                 <div>
                   <a
@@ -468,9 +512,21 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
             </div>
           </div>
         </div>
-      </div>
+      </div >
 
-      <ul role="list" className="divide-y divide-gray-100">
+      {info.websiteType === WebsiteType.Custom ?
+        <div className="pt-8 mb-3">
+          <span className="text-gray-500 dark:text-gray-800">Please go to </span>
+          <a
+            href={`https://testnet.dcellar.io/buckets/${info.bucketName}`}
+            className="text-blue-600 hover:text-blue-500">
+            {`https://testnet.dcellar.io/buckets/${info.bucketName}`}
+          </a>
+          <span className="text-gray-500 dark:text-gray-800"> to upload your static HTML files.</span>
+        </div> : <></>
+      }
+
+      <ul role="list" className="divide-y divide-gray-100 mt-8">
         {posts.length > 0 &&
           posts.map((el) => (
             <li
@@ -543,6 +599,6 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
             </li>
           ))}
       </ul>
-    </div>
+    </div >
   );
 }

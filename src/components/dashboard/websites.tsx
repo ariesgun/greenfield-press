@@ -23,6 +23,44 @@ export function WebsitesDashboard() {
   useEffect(() => {
     if (!address) return;
 
+    const findInfo = async (bucketName) => {
+      if (!bucketName) return null;
+
+      try {
+        const provider = await connector?.getProvider();
+        const offChainData = await getOffchainAuthKeys(address, provider);
+        if (!offChainData) {
+          alert("No offchain, please create offchain pairs first");
+          return;
+        }
+
+        // Check if object exists
+        const objectName = ".info";
+        const postOrigName = await client.object.getObject(
+          {
+            bucketName: bucketName as string,
+            objectName: objectName,
+          },
+          {
+            type: "EDDSA",
+            address,
+            domain: window.location.origin,
+            seed: offChainData.seedString,
+          }
+        );
+        if (postOrigName.code === 0) {
+          const payload = JSON.parse(await postOrigName.body.text());
+          console.log("COntent: ", payload);
+          return payload
+        } else {
+          return null
+        }
+      } catch (error) {
+        console.log("File does not exists", error);
+        return null;
+      }
+    };
+
     const listBuckets = async () => {
       const spInfo = await selectSp();
       console.log("spInfo", spInfo);
@@ -43,22 +81,24 @@ export function WebsitesDashboard() {
         if (listBucketsTx.code === 0) {
           const bucketsInfo = listBucketsTx?.body!;
           //   console.log(bucketsInfo);
-
-          bucketsInfo.forEach((el) => {
-            const svgString = toSvg(el.BucketInfo.BucketName, 100);
-            // console.log(svgString);
-            setBuckets((buckets) => [
-              ...buckets,
-              {
-                id: el.BucketInfo.Id,
-                bucketName: el.BucketInfo.BucketName,
-                owner: el.BucketInfo.Owner,
-                paymentAddress: el.BucketInfo.PaymentAddress,
-                createdAt: el.BucketInfo.CreateAt,
-                updatedAt: el.UpdateTime,
-                avatar: svgString,
-              },
-            ]);
+          bucketsInfo.forEach(async (el) => {
+            const payload = await findInfo(el.BucketInfo.BucketName)
+            if (payload) {
+              const svgString = toSvg(el.BucketInfo.BucketName, 100);
+              // console.log(svgString);
+              setBuckets((buckets) => [
+                ...buckets,
+                {
+                  id: el.BucketInfo.Id,
+                  bucketName: el.BucketInfo.BucketName,
+                  owner: el.BucketInfo.Owner,
+                  paymentAddress: el.BucketInfo.PaymentAddress,
+                  createdAt: el.BucketInfo.CreateAt,
+                  updatedAt: el.UpdateTime,
+                  avatar: svgString,
+                },
+              ]);
+            }
           });
         }
       } catch (err) {

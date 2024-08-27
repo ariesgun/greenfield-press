@@ -19,7 +19,7 @@ import { bnbRegistryABI } from "../contracts/bnbRegistry";
 import { resolverABI } from "../contracts/resolver";
 import Web3 from "web3";
 import { encodeDNSRecord } from "@/utils/dnsUtil";
-import { createPublicClient, http } from "viem";
+import { createPublicClient, http, namehash } from "viem";
 import { bsc } from "viem/chains";
 import { ReedSolomon } from "@bnb-chain/reed-solomon";
 import {
@@ -308,13 +308,15 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
     }
 
     const name = web3.utils.keccak256(bnbName.split(".")[0]);
+    const nodehash = namehash(bnbName)
     const baseNode =
       "0xdba5666821b22671387fe7ea11d7cc41ede85a5aa67c3e7b3d68ce6a661f389c";
-    const nodehash = Web3.utils.keccak256(
+    const nodehash2 = Web3.utils.keccak256(
       web3.utils.encodePacked(baseNode, name)
     );
 
-    console.log(nodehash);
+    console.log(nodehash, nodehash2);
+    console.log(typeof (nodehash), typeof (nodehash2));
 
     try {
       const res1 = await writeAsync({
@@ -325,6 +327,7 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
         onError(error) {
           console.log("Error", error);
         },
+        enabled: Boolean(nodehash)
       });
       const transaction1 = await publicClient.waitForTransactionReceipt({
         hash: res1.hash,
@@ -346,7 +349,8 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
       const dnsRecords = encodeDNSRecord(
         bnbName,
         info.bucketName as string,
-        web3
+        web3,
+        prefix = info.websiteType === WebsiteType.Custom ? "" : "gnfd-press-"
       );
       const res3 = await writeAsync({
         address: resolverAddress,

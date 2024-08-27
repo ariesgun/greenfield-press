@@ -7,7 +7,8 @@ function toHex(d) {
 export const encodeDNSRecord = (
   bnbName: string,
   bucketName: string,
-  web3: Web3
+  web3: Web3,
+  prefix: string = "gnfd-press-"
 ) => {
   let output = "0x";
 
@@ -30,7 +31,7 @@ export const encodeDNSRecord = (
   output += "0000184c";
 
   // RDLength + RD
-  const payload = `dnslink=https://gnfd-testnet-sp2.nodereal.io/view/gnfd-press-${bucketName}/`;
+  const payload = `dnslink=https://gnfd-testnet-sp2.nodereal.io/view/${prefix}${bucketName}/`;
   const payloadHex = Buffer.from(payload, "utf-8").toString("hex");
   output += web3.utils.padLeft(toHex(payloadHex.length / 2), 4);
   output += payloadHex;

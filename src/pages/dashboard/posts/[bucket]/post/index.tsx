@@ -28,6 +28,7 @@ export default function CreateNewPost() {
   const info = {
     bucketName: router.query.bucket,
     objectName: "",
+    postTitle: "",
   }
 
   if (!isMounted) return null;

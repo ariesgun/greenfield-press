@@ -28,7 +28,7 @@ import {
   RedundancyType,
   VisibilityType,
 } from "@bnb-chain/greenfield-js-sdk";
-import { BSC_CHAIN_ID } from "@/config/env";
+import { BSC_CHAIN_ID, GREEN_CHAIN_ID } from "@/config/env";
 
 const registryAddress = "0x08ced32a7f3eec915ba84415e9c07a7286977956";
 const resolverAddress = "0xE4429DEd21a6e7bf7d187CeD5b74c40Cd27f0190";
@@ -316,33 +316,33 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
     // );
 
     try {
-      // const res1 = await writeAsync({
-      //   address: registryAddress,
-      //   abi: bnbRegistryABI,
-      //   functionName: "setResolver",
-      //   args: [nodehash, resolverAddress],
-      //   onError(error) {
-      //     console.log("Error", error);
-      //   },
-      //   enabled: Boolean(nodehash)
-      // });
-      // const transaction1 = await publicClient.waitForTransactionReceipt({
-      //   hash: res1.hash,
-      //   confirmations: 5,
-      // });
-      // const res2 = await writeAsync({
-      //   address: resolverAddress,
-      //   abi: resolverABI,
-      //   functionName: "setAddr",
-      //   args: [nodehash, address],
-      //   onError(error) {
-      //     console.log("Error", error);
-      //   },
-      // });
-      // const transaction2 = await publicClient.waitForTransactionReceipt({
-      //   hash: res2.hash,
-      //   confirmations: 5,
-      // });
+      const res1 = await writeAsync({
+        address: registryAddress,
+        abi: bnbRegistryABI,
+        functionName: "setResolver",
+        args: [nodehash, resolverAddress],
+        onError(error) {
+          console.log("Error", error);
+        },
+        enabled: Boolean(nodehash)
+      });
+      const transaction1 = await publicClient.waitForTransactionReceipt({
+        hash: res1.hash,
+        confirmations: 5,
+      });
+      const res2 = await writeAsync({
+        address: resolverAddress,
+        abi: resolverABI,
+        functionName: "setAddr",
+        args: [nodehash, address],
+        onError(error) {
+          console.log("Error", error);
+        },
+      });
+      const transaction2 = await publicClient.waitForTransactionReceipt({
+        hash: res2.hash,
+        confirmations: 5,
+      });
       const dnsRecords = encodeDNSRecord(
         bnbName,
         info.bucketName as string,
@@ -358,10 +358,14 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
           console.log("Error", error);
         },
       });
+
+      switchNetwork(GREEN_CHAIN_ID);
+
       const transaction3 = await publicClient.waitForTransactionReceipt({
         hash: res3.hash,
         confirmations: 5,
       });
+
       await uploadInfo();
     } catch (error) {
       alert("Error..." + error);

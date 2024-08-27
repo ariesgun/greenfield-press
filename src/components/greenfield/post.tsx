@@ -27,7 +27,7 @@ export const PostGreenfield = ({
   }>({
     bucketName: objectInfo ? objectInfo.bucketName : "",
     objectName: objectInfo ? objectInfo.objectName : "",
-    postTitle: "",
+    postTitle: objectInfo ? objectInfo.postTitle : "",
     file: null,
   });
 

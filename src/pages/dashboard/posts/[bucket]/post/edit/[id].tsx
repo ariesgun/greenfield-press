@@ -28,9 +28,11 @@ export default function Post() {
   const [info, setInfo] = useState<{
     bucketName: string;
     objectName: string;
+    postTitle: string;
   }>({
     bucketName: "",
     objectName: "",
+    postTitle: ""
   });
 
   const router = useRouter();
@@ -96,6 +98,7 @@ export default function Post() {
           }
 
           const json = await response.json();
+          setInfo({ ...info, postTitle: json.title })
           console.log("JSON", json);
 
           setContent(json);
@@ -136,7 +139,7 @@ export default function Post() {
                 }}
                 holder="editor_create"
                 readOnly={false}
-                // editorRef={editorRef}
+              // editorRef={editorRef}
               />
             </PostGreenfield>
           </>

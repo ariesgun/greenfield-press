@@ -102,7 +102,7 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
         console.log(postOrigName)
         const payload = JSON.parse(await postOrigName.body.text());
         setBnbName(payload.bnb);
-        setInfo({ ...info, bucketName: bucketName, websiteType: payload.type, prefix: payload.type === WebsiteType.Custom ? "" : "gnfd-press" })
+        setInfo({ ...info, bucketName: bucketName, websiteType: payload.type, prefix: payload.type === WebsiteType.Custom ? "" : "gnfd-press-" })
         console.log("COntent: ", payload, info);
       } catch (error) {
         console.log("File does not exists", error);
@@ -309,48 +309,45 @@ export function Dashboard({ bucket }: { bucket: string | string[] }) {
 
     const name = web3.utils.keccak256(bnbName.split(".")[0]);
     const nodehash = namehash(bnbName)
-    const baseNode =
-      "0xdba5666821b22671387fe7ea11d7cc41ede85a5aa67c3e7b3d68ce6a661f389c";
-    const nodehash2 = Web3.utils.keccak256(
-      web3.utils.encodePacked(baseNode, name)
-    );
-
-    console.log(nodehash, nodehash2);
-    console.log(typeof (nodehash), typeof (nodehash2));
+    // const baseNode =
+    //   "0xdba5666821b22671387fe7ea11d7cc41ede85a5aa67c3e7b3d68ce6a661f389c";
+    // const nodehash2 = Web3.utils.keccak256(
+    //   web3.utils.encodePacked(baseNode, name)
+    // );
 
     try {
-      const res1 = await writeAsync({
-        address: registryAddress,
-        abi: bnbRegistryABI,
-        functionName: "setResolver",
-        args: [nodehash, resolverAddress],
-        onError(error) {
-          console.log("Error", error);
-        },
-        enabled: Boolean(nodehash)
-      });
-      const transaction1 = await publicClient.waitForTransactionReceipt({
-        hash: res1.hash,
-        confirmations: 5,
-      });
-      const res2 = await writeAsync({
-        address: resolverAddress,
-        abi: resolverABI,
-        functionName: "setAddr",
-        args: [nodehash, address],
-        onError(error) {
-          console.log("Error", error);
-        },
-      });
-      const transaction2 = await publicClient.waitForTransactionReceipt({
-        hash: res2.hash,
-        confirmations: 5,
-      });
+      // const res1 = await writeAsync({
+      //   address: registryAddress,
+      //   abi: bnbRegistryABI,
+      //   functionName: "setResolver",
+      //   args: [nodehash, resolverAddress],
+      //   onError(error) {
+      //     console.log("Error", error);
+      //   },
+      //   enabled: Boolean(nodehash)
+      // });
+      // const transaction1 = await publicClient.waitForTransactionReceipt({
+      //   hash: res1.hash,
+      //   confirmations: 5,
+      // });
+      // const res2 = await writeAsync({
+      //   address: resolverAddress,
+      //   abi: resolverABI,
+      //   functionName: "setAddr",
+      //   args: [nodehash, address],
+      //   onError(error) {
+      //     console.log("Error", error);
+      //   },
+      // });
+      // const transaction2 = await publicClient.waitForTransactionReceipt({
+      //   hash: res2.hash,
+      //   confirmations: 5,
+      // });
       const dnsRecords = encodeDNSRecord(
         bnbName,
         info.bucketName as string,
         web3,
-        prefix = info.websiteType === WebsiteType.Custom ? "" : "gnfd-press-"
+        info.websiteType === WebsiteType.Custom ? "" : "gnfd-press-"
       );
       const res3 = await writeAsync({
         address: resolverAddress,

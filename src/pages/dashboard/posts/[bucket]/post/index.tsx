@@ -10,6 +10,7 @@ import { useAccount } from "wagmi";
 import dynamic from "next/dynamic";
 import { PostGreenfield } from "@/components/greenfield";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { useRouter } from "next/router";
 
 let Editor = dynamic(() => import("@/components/editor"), {
   ssr: false,
@@ -22,6 +23,12 @@ export default function CreateNewPost() {
   const { isConnected } = useAccount();
   const [content, setContent] = useState<any>({});
   // const editorRef = useRef(null);
+  const router = useRouter();
+
+  const info = {
+    bucketName: router.query.bucket,
+    objectName: "",
+  }
 
   if (!isMounted) return null;
 
@@ -37,15 +44,14 @@ export default function CreateNewPost() {
         {isConnected && (
           <>
             <Breadcrumb />
-            <PostGreenfield data={content}>
+            <PostGreenfield data={content} objectInfo={info}>
               <Editor
                 data={content}
                 onChange={(e) => {
-                  console.log("H", e);
                   setContent({ ...content, payload: e });
                 }}
                 holder="editor_create"
-                // editorRef={editorRef}
+              // editorRef={editorRef}
               />
             </PostGreenfield>
           </>

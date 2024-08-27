@@ -25,8 +25,8 @@ export const PostGreenfield = ({
     postTitle: string;
     file: File | null;
   }>({
-    bucketName: "helllo-world-test-xeo",
-    objectName: "",
+    bucketName: objectInfo ? objectInfo.bucketName : "",
+    objectName: objectInfo ? objectInfo.objectName : "",
     postTitle: "",
     file: null,
   });
@@ -35,17 +35,6 @@ export const PostGreenfield = ({
 
   const [txHash, setTxHash] = useState<string>();
   const router = useRouter();
-
-  useEffect(() => {
-    if (!objectInfo) return;
-
-    setInfo({
-      ...info,
-      bucketName: objectInfo.bucketName,
-      objectName: objectInfo.objectName,
-      postTitle: data.title,
-    });
-  }, [objectInfo]);
 
   useEffect(() => {
     if (
@@ -99,6 +88,7 @@ export const PostGreenfield = ({
       }
 
       const rs = new ReedSolomon();
+      console.log("Info ", info)
       const payload = {
         title: info.postTitle,
         payload: data.payload,
@@ -109,8 +99,6 @@ export const PostGreenfield = ({
       const fileBytes = await blob.arrayBuffer();
 
       const expectCheckSums = rs.encode(new Uint8Array(fileBytes));
-
-      console.log("rs", expectCheckSums);
 
       const createPostTx = await client.object.createObject({
         bucketName: info.bucketName,
